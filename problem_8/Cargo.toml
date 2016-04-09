@@ -1,0 +1,7 @@
+[package]
+name = "problem_8"
+version = "0.1.0"
+authors = ["Matt Smith <mss@datera.io>"]
+
+[dependencies]
+num = "0.1.31"
