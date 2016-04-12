@@ -1,6 +1,6 @@
 [package]
 name = "problem_18"
 version = "0.1.0"
-authors = ["Matt Smith <mss@datera.io>"]
+authors = ["Matt Smith <matthew.smith491@gmail.com>"]
 
 [dependencies]
