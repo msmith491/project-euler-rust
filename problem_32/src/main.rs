@@ -61,6 +61,4 @@ fn main() {
 
      println!("{:?}", set.iter().fold(0, |acc, item| acc + item));
 
-
-
 }
