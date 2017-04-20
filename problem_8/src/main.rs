@@ -1,7 +1,3 @@
-// extern crate num;
-
-// use num::BigUint;
-
 fn main() {
     let s = "73167176531330624919225119674426574742355349194934
             96983520312774506326239578318016984801869478851843
@@ -25,25 +21,19 @@ fn main() {
             71636269561882670428252483600823257530420752963450";
 
 
-    let sf = s
-        .replace("\n", "")
-        .replace(" ", "");
+    let sf: String = s.chars().filter(|x| !x.is_whitespace()).collect();
 
-    let mut largest: u64 = 0;
+    let length = 13;
 
-    for index in 0..(sf.len() - 12) {
-        // println!("{}", &sf[index..(index+13)]);
-        let sub = sf[index..(index+13)].chars();
-        let mut prod: u64 = 1;
-        for elem in sub {
-            prod = prod * elem.to_digit(10).unwrap() as u64;
-        }
-
-        if prod > largest {
-            largest = prod;
-        }
+    fn digit_mult(sub: &str) -> usize {
+        sub.chars().fold(1, |acc, i| acc * i.to_digit(10).unwrap() as usize)
     }
 
-    println!("{}", largest);
+    let result = (0..(sf.len() - (length - 1)))
+        .map(|x| digit_mult(&sf[x..(x + length)]))
+        .max()
+        .unwrap();
+
+    println!("{}", result);
 
 }
