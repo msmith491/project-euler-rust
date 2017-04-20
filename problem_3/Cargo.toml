@@ -2,6 +2,3 @@
 name = "problem_3"
 version = "0.1.0"
 authors = ["Matt Smith <matthew.smith491@gmail.com>"]
-
-[dependencies]
-range_check = "0.1.0"
