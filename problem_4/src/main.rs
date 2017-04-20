@@ -4,7 +4,8 @@ fn main() {
         n.to_string() == n.to_string().chars().rev().collect::<String>()
     }
 
-    let result = (800..999).rev()
+    let result = (800..999)
+        .rev()
         .map(|x| {
             (800..999)
                 .rev()
@@ -12,8 +13,9 @@ fn main() {
                 .filter(|&z| is_palindrome(z as usize))
                 .max()
                 .unwrap_or(0)
-            })
-        .max().unwrap();
+        })
+        .max()
+        .unwrap();
 
     println!("{}", result);
 }

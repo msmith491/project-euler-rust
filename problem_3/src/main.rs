@@ -3,7 +3,8 @@ fn main() {
     fn is_prime(n: usize) -> bool {
 
         let primes: Vec<usize> = vec![1, 2, 3, 5, 7];
-        match n < 1 || n % 2 == 0 || n % 3 == 0 || primes.iter().filter(|&x| *x == n).collect::<Vec<_>>().len() > 0 {
+        match n < 1 || n % 2 == 0 || n % 3 == 0 ||
+              primes.iter().filter(|&x| *x == n).collect::<Vec<_>>().len() > 0 {
             true => return false,
             _ => {
                 let mut i = 5;
@@ -17,7 +18,7 @@ fn main() {
                     }
                     i = i + 6;
                 }
-            },
+            }
         }
         true
     }
