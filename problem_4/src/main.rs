@@ -1,22 +1,19 @@
 fn main() {
 
-    fn is_palindrome(n: i64) -> bool {
-        let s = n.to_string();
-        let rev: String = n.to_string().chars().rev().collect();
-        s == rev
+    fn is_palindrome(n: usize) -> bool {
+        n.to_string() == n.to_string().chars().rev().collect::<String>()
     }
 
-    // println!("{}", is_palindrome(1234321));
+    let result = (800..999).rev()
+        .map(|x| {
+            (800..999)
+                .rev()
+                .map(|y| x * y)
+                .filter(|&z| is_palindrome(z as usize))
+                .max()
+                .unwrap_or(0)
+            })
+        .max().unwrap();
 
-    let mut largest = 0;
-
-    for x in (800..999).rev() {
-        for y in (800..999).rev() {
-            let mult = x * y;
-            if is_palindrome(mult) && mult > largest {
-                println!("{}", mult);
-                largest = mult
-            }
-        }
-    }
+    println!("{}", result);
 }
