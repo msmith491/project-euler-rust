@@ -1,47 +1,39 @@
-extern crate range_check;
-
-use range_check::Contains;
-
 fn main() {
 
-    fn is_prime(n: u64) -> bool {
+    fn timeit(t1: std::time::Instant) -> f64 {
+        let t2 = std::time::Instant::now().duration_since(t1);
+        t2.as_secs() as f64 + t2.subsec_nanos() as f64 / 1000000000.00
+    }
 
-        let mut primes: Vec<u64> = vec![1, 2, 3, 5, 7];
-        if n < 1 {
-            return false;
-        } else if primes.contains(&n) {
-            return true;
-        } else if n % 2 == 0 || n % 3 == 0 {
-            return false;
-        } else {
-            let mut i = 5;
-            loop {
-                if i * i > n {
-                    break;
-                } else {
-                    if n % i == 0 || n % (i + 2) == 0 {
-                        return false;
+    fn is_prime(n: usize) -> bool {
+
+        let primes: Vec<usize> = vec![1, 2, 3, 5, 7];
+        match n < 1 || n % 2 == 0 || n % 3 == 0 ||
+              primes.iter().filter(|&x| *x == n).collect::<Vec<_>>().len() > 0 {
+            true => return false,
+            _ => {
+                let mut i = 5;
+                loop {
+                    if i * i > n {
+                        break;
+                    } else {
+                        if n % i == 0 || n % (i + 2) == 0 {
+                            return false;
+                        }
                     }
+                    i = i + 6;
                 }
-                i = i + 6;
             }
         }
         true
     }
 
-    fn sum_primes_below(n: u64) -> u64 {
+    fn sum_primes_below(n: usize) -> usize {
 
-        // let mut total: u64 = 0;
-
-        // for elem in 2..n {
-        //     if is_prime(elem) {
-        //         total = total + elem;
-        //     }
-        // }
-        // total
-
-        (2..n).filter(|&x| is_prime(x)).fold(0, |acc, item| acc + item)
+        (2..n).filter(|&x| is_prime(x as usize)).fold(0, |acc, item| acc + item)
     }
 
+    let t1 = std::time::Instant::now();
     println!("{}", sum_primes_below(2000000));
+    println!("{}", timeit(t1));
 }
