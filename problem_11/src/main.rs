@@ -1,6 +1,17 @@
+macro_rules! timeit {
+    ($func:expr) => ({
+        let t1 = std::time::Instant::now();
+        println!("{:?}", $func);
+        let t2 = std::time::Instant::now().duration_since(t1);
+        println!("{}", t2.as_secs() as f64 + t2.subsec_nanos() as f64 / 1000000000.00);
+    })
+}
+
+
 fn main() {
 
-    let s: Vec<u64> = "
+    const SIZE: usize = 4;
+    let s: Vec<usize> = "
             08 02 22 97 38 15 00 40 00 75 04 05 07 78 52 12 50 77 91 08
             49 49 99 40 17 81 18 57 60 87 17 40 98 43 69 48 04 56 62 00
             81 49 31 73 55 79 14 29 93 71 40 67 53 88 30 03 49 13 36 65
@@ -21,127 +32,79 @@ fn main() {
             20 69 36 41 72 30 23 88 34 62 99 69 82 67 59 85 74 04 36 16
             20 73 35 29 78 31 90 01 74 31 49 71 48 86 81 16 23 57 05 54
             01 70 54 71 83 51 54 69 16 92 33 48 61 43 52 01 89 19 67 48"
-            .split(" ")
-            .filter(|&x| !x.is_empty())
-            .filter(|&x| x != "\n")
-            .collect::<Vec<&str>>()
-            .iter()
-            .map(|&x| x.trim().parse().unwrap())
-            .collect();
+        .split(" ")
+        .filter(|&x| !x.is_empty() && x != "\n")
+        .map(|x| x.trim().parse().unwrap())
+        .collect();
 
-    fn get_slice(sb: &Vec<u64>, index: u64) -> &[u64] {
+    fn get_slice(sb: &Vec<usize>, index: usize) -> &[usize] {
         &sb[index as usize..(index + 4) as usize]
     }
 
-    fn get_v_slice(sb: &Vec<u64>, index: u64, vec: &mut Vec<u64>) {
-        let mut curr_mut = 0;
-        loop {
-            let new_index = index + (curr_mut * 20);
-            vec.push(sb[new_index as usize]);
-            curr_mut = curr_mut + 1;
-            if curr_mut == 4 {
-                break;
-            }
-        }
+    fn get_v_slice(sb: &Vec<usize>, index: usize, vec: &mut Vec<usize>) {
+        (0..SIZE)
+            .map(|x| vec.push(sb[(index + (x * 20)) as usize]))
+            .collect::<Vec<_>>();
     }
 
-    fn get_fd_slice(sb: &Vec<u64>, index: u64, vec: &mut Vec<u64>) {
-        let mut curr_mut = 0;
-        loop {
-            let new_index = index + (curr_mut * 20) + curr_mut;
-            vec.push(sb[new_index as usize]);
-            curr_mut = curr_mut + 1;
-            if curr_mut == 4 {
-                break;
-            }
-        }
+    fn get_fd_slice(sb: &Vec<usize>, index: usize, vec: &mut Vec<usize>) {
+        (0..SIZE)
+            .map(|x| vec.push(sb[(index + (x * 20) + x) as usize]))
+            .collect::<Vec<_>>();
     }
 
-    fn get_bd_slice(sb: &Vec<u64>, index: u64, vec: &mut Vec<u64>) {
-        let mut curr_mut = 0;
-        loop {
-            let new_index = index + 3 + (curr_mut * 20) - curr_mut;
-            vec.push(sb[new_index as usize]);
-            curr_mut = curr_mut + 1;
-            if curr_mut == 4 {
-                break;
-            }
-        }
+    fn get_bd_slice(sb: &Vec<usize>, index: usize, vec: &mut Vec<usize>) {
+        (0..SIZE)
+            .map(|x| vec.push(sb[(index + (x * 20) + SIZE - 1 - x) as usize]))
+            .collect::<Vec<_>>();
     }
 
-    fn calc_h(sb: &Vec<u64>, index: u64) -> u64 {
-        let mut largest = 0;
-        let mut curr_index = 0;
-        loop {
-            let new_index = index + (curr_index * 20);
-            let slice = get_slice(sb, new_index);
-            let calc = slice.iter().fold(1, |acc, item| acc * item);
-            if calc > largest {
-                largest = calc;
-            }
-            curr_index = curr_index + 1;
-            if curr_index == 4 {
-                break;
-            }
-        }
-        largest
+    fn calc_h(sb: &Vec<usize>, index: usize) -> usize {
+        (0..SIZE)
+            .map(|x| get_slice(sb, index + (x * 20)))
+            .map(|s| s.iter().fold(1, |acc, item| acc * item))
+            .max()
+            .unwrap()
     }
 
 
-    fn calc_v(sb: &Vec<u64>, index: u64) -> u64 {
-        let mut largest = 0;
-        let mut curr_index = 0;
-        loop {
-            let new_index = index + 1;
-            let mut vec: Vec<u64> = Vec::new();
-            get_v_slice(sb, new_index, &mut vec);
-            let calc = vec.iter().fold(1, |acc, item| acc * item);
-            if calc > largest {
-                largest = calc;
-            }
-            curr_index = curr_index + 1;
-            if curr_index == 4 {
-                break;
-            }
-        }
-        largest
+    fn calc_v(sb: &Vec<usize>, index: usize) -> usize {
+        (1..SIZE + 1)
+            .map(|x| (x, Vec::new()))
+            .map(|(x, mut v)| {
+                get_v_slice(sb, index + x, &mut v);
+                v
+            })
+            .map(|s| s.iter().fold(1, |acc, item| acc * item))
+            .max()
+            .unwrap()
     }
 
 
-    fn calc_d(sb: &Vec<u64>, index: u64) -> u64 {
+    fn calc_d(sb: &Vec<usize>, index: usize) -> usize {
 
-        let mut vec1: Vec<u64> = Vec::new();
+        let mut vec1: Vec<usize> = Vec::new();
         get_fd_slice(sb, index, &mut vec1);
         let calc1 = vec1.iter().fold(1, |acc, item| acc * item);
 
-        let mut vec2: Vec<u64> = Vec::new();
+        let mut vec2: Vec<usize> = Vec::new();
         get_bd_slice(sb, index, &mut vec2);
         let calc2 = vec2.iter().fold(1, |acc, item| acc * item);
 
-        if calc2 > calc1 {
-            return calc2
-        }
-        calc1
+        vec![calc1, calc2].into_iter().max().unwrap()
     }
 
-    fn get_largest_for_block(sb: &Vec<u64>, index: u64) -> u64 {
-        let h = calc_h(sb, index);
-        let v = calc_v(sb, index);
-        let d = calc_d(sb, index);
-
-        let vec = vec![h, v, d];
-
-        *vec.iter().max().unwrap()
+    fn get_largest_for_block(sb: &Vec<usize>, index: usize) -> usize {
+        vec![calc_h(sb, index), calc_v(sb, index), calc_d(sb, index)].into_iter().max().unwrap()
     }
 
-    fn get_largest(sb: &Vec<u64>) -> u64 {
+    fn get_largest(sb: &Vec<usize>) -> usize {
         let mut largest = 0;
         for scale in 1..17 {
             for xindex in 0..16 {
                 let index = xindex + (scale * 20);
                 let result = get_largest_for_block(sb, index);
                 if result > largest {
-                    // println!("{}", result);
                     largest = result;
                 }
             }
@@ -149,5 +112,5 @@ fn main() {
         largest
     }
 
-    println!("{:?}", get_largest(&s));
+    timeit!(get_largest(&s));
 }
