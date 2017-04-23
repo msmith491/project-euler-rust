@@ -1,3 +1,12 @@
+macro_rules! timeit {
+    ($func:expr) => ({
+        let t1 = std::time::Instant::now();
+        println!("{:?}", $func);
+        let t2 = std::time::Instant::now().duration_since(t1);
+        println!("{}", t2.as_secs() as f64 + t2.subsec_nanos() as f64 / 1000000000.00);
+    })
+}
+
 fn main() {
 
     fn is_prime(n: usize) -> bool {
@@ -24,12 +33,13 @@ fn main() {
     }
 
 
-    let num = 600851475143;
+    fn largest_prime_factor(num: usize) -> usize {
+        (2..((num / 2) as f64).sqrt() as usize + 1)
+            .rev()
+            .filter(|&x| x % 2 != 0 && num % x == 0 && is_prime(x) || x == 2)
+            .take(1)
+            .collect::<Vec<usize>>()[0]
+    }
 
-    let result = (2..((num / 2) as f64).sqrt() as usize + 1)
-        .rev()
-        .filter(|&x| x % 2 != 0 && num % x == 0 && is_prime(x) || x == 2)
-        .take(1)
-        .collect::<Vec<usize>>()[0];
-    println!("{:?}", result);
+    timeit!(largest_prime_factor(600851475143))
 }

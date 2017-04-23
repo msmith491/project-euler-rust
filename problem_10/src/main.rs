@@ -1,9 +1,14 @@
-fn main() {
-
-    fn timeit(t1: std::time::Instant) -> f64 {
+macro_rules! timeit {
+    ($func:expr) => ({
+        let t1 = std::time::Instant::now();
+        println!("{:?}", $func);
         let t2 = std::time::Instant::now().duration_since(t1);
-        t2.as_secs() as f64 + t2.subsec_nanos() as f64 / 1000000000.00
-    }
+        println!("{}", t2.as_secs() as f64 + t2.subsec_nanos() as f64 / 1000000000.00);
+    })
+}
+
+
+fn main() {
 
     fn is_prime(n: usize) -> bool {
 
@@ -33,7 +38,5 @@ fn main() {
         (2..n).filter(|&x| is_prime(x as usize)).fold(0, |acc, item| acc + item)
     }
 
-    let t1 = std::time::Instant::now();
-    println!("{}", sum_primes_below(2000000));
-    println!("{}", timeit(t1));
+    timeit!(sum_primes_below(2000000));
 }
